@@ -1,37 +1,38 @@
 # auto-liquify
 
-Minimal, high-end automated **Douyin-style Face Liquify** in Python, reverse-engineered from **Photoshop Face-Aware Liquify** (`Liquify.plugin` vector distortion mesh + nozzle profiles).
+Minimal, high-end automated and interactive **Face-Aware Liquify** in Python, reverse-engineered directly from **Photoshop 2025's Face-Aware Liquify** (`Liquify.plugin` vector distortion mesh + nozzle profiles + interactive guide trackers).
 
-Built with `ponytail` principles (~130 lines, zero bloat, pure NumPy + OpenCV + ONNXRuntime).
-
----
-
-## Features
-
-- **468-Landmark Thin Plate Spline (TPS) RBF**: Smooth, natural 2D displacement field avoiding plastic AI-hallucination or blurring. Skin pores, highlights, and micro-textures remain 100% crisp.
-- **Dynamic Scale Normalization**: Automatically scales jawline, chin, and eye offset vectors according to face pixel size (`face_w / 200px`), preventing pinching/hollowing on distant or small faces.
-- **Background & Hair Lock**: A ring of static TPS anchor points placed outside the face boundary guarantees **zero background warping** or shoulder bending.
-- **Douyin Retouching Profiles**:
-  - `v_line`: Natural jawline narrowing.
-  - `chin_lift`: Chin point elevation & refinement.
-  - `nose_slim`: Subtle nasal ala compression.
-  - `big_eye`: Radial expansion preserving iris roundness.
+Built with `ponytail` principles (~150 lines, zero bloat, pure NumPy + OpenCV + ONNXRuntime).
 
 ---
 
-## Quickstart
+## 1. Photoshop Guide Control & Interactive UI (`face_liquify_gui.py`)
 
-### Prerequisites
+Reverse-engineered from Adobe Photoshop's `CLFaceToolLinearTracker`, `CLFaceToolDisplacementTracker`, and `CLAdvancedControlsPanel`:
+- **Direct Canvas Dragging (Nắm kéo trực tiếp)**: Hover and drag on-canvas guide handles (eyes, nose, mouth corners, lips, chin, jawline, forehead) to morph features in real-time.
+- **Adobe-Style Properties Panel**: Live side panel with sliders across 4 core anatomical groups:
+  - **EYES**: Eye Size, Eye Height, Eye Width, Eye Tilt.
+  - **NOSE**: Nose Height, Nose Width.
+  - **MOUTH**: Smile, Upper Lip, Lower Lip, Mouth Width, Mouth Height.
+  - **FACE SHAPE**: Forehead, Chin Height, Jawline, Face Width.
+- **Pure Texture Preservation**: Real-time Thin Plate Spline (TPS) RBF vector deformation (`K = r^2 * ln(r)`) with Lanczos4 remapping preserves 100% skin micro-textures and sharpness.
+- **Static Anchor Ring**: Locks background, hair, neck, and shoulders at `0px` displacement.
 
 ```bash
-pip install numpy opencv-python onnxruntime
+python3 face_liquify_gui.py portrait.jpg
 ```
 
-Download the required ONNX models:
-- [face_detection_yunet_2023mar.onnx](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet) (227 KB)
-- [face_landmarks_468.onnx](https://github.com/PINTO0309/PINTO_model_zoo/tree/main/112_face_mesh) (~4.9 MB MediaPipe Face Mesh)
+**Shortcuts in GUI Window**:
+- **Left-Click + Drag**: Click on any face handle to drag & distort, or drag sliders on the side panel.
+- **[S]**: Save the current warped photo to `liquified_result.jpg`.
+- **[R]**: Reset all parameters to zero.
+- **[Q] / [ESC]**: Exit.
 
-### Usage
+---
+
+## 2. Automated Douyin Beautification (`auto_liquify.py`)
+
+Batch/headless 1-liner function applying the optimized Douyin aesthetic profile:
 
 ```python
 import cv2
@@ -54,10 +55,12 @@ cv2.imwrite("beautified.jpg", beautified)
 
 ---
 
-## How It Works (Photoshop Reverse-Engineering)
+## Prerequisites
 
-1. **Detection & Alignment**: YuNet detects face bounding boxes, cropped with $1.4\times$ margin and fed into MediaPipe FaceMesh to extract 468 3D landmarks.
-2. **Displacement Vectors**: Control points along the jawline, nose alae, and eyes are displaced along physiological contour normals.
-3. **Radial Basis Function (Thin Plate Spline)**: Computes a global minimum-curvature mapping kernel:
-   $$K(r) = r^2 \ln(r + \epsilon)$$
-4. **Remapping**: Uses `cv2.remap` with `INTER_LANCZOS4` over the predicted deformation grid, updating only pixels within the face ROI.
+```bash
+pip install numpy opencv-python onnxruntime
+```
+
+Required ONNX models:
+- [face_detection_yunet_2023mar.onnx](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet) (227 KB)
+- [face_landmarks_468.onnx](https://github.com/PINTO0309/PINTO_model_zoo/tree/main/112_face_mesh) (~4.9 MB MediaPipe Face Mesh)
