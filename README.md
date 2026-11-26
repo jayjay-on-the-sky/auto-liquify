@@ -55,12 +55,14 @@ cv2.imwrite("beautified.jpg", beautified)
 
 ---
 
-## Prerequisites
+## Prerequisites & Pre-trained Models
 
 ```bash
 pip install numpy opencv-python onnxruntime
 ```
 
-Required ONNX models:
-- [face_detection_yunet_2023mar.onnx](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet) (227 KB)
-- [face_landmarks_468.onnx](https://github.com/PINTO0309/PINTO_model_zoo/tree/main/112_face_mesh) (~4.9 MB MediaPipe Face Mesh)
+All ONNX model weights are hosted on Google Drive:
+- 📁 **[Google Drive Folder (All Models)](https://drive.google.com/drive/folders/1GQYws9PgH1GQdt8Oa66BqssjgxzsiHb-)**
+  - [face_detection_yunet_2023mar.onnx](https://drive.google.com/file/d/1ysDsFFPp7Y2PXOppDK3H5gS2ixRrurUC/view?usp=sharing) (227 KB)
+  - [face_landmarks_468.onnx](https://drive.google.com/file/d/1Nl2a5cDx8lkY_DKHkBgwTiHIn-9hj74V/view?usp=sharing) (4.7 MB)
+  - [2dfan4.onnx](https://drive.google.com/file/d/1jSpLdxxLnFNes6jCbMeapHdSQPIqE_78/view?usp=sharing) (93 MB)
